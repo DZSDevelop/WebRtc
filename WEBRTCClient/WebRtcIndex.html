@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WEB RTC TEST</title>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+</head>
+<body>
+<!--显示控制按钮-->
+<H1>WEBRTC Test</H1>
+<div>
+    <button id="showLocal" onclick="showLocalClick()">显示本地流</button>
+    <button id="call" onclick="callClick()">Call</button>
+</div>
+<div >
+    <div>
+        <H4>本地视频</H4>
+
+        <video id="lVideo" autoplay controls/>
+    </div>
+    <div>
+        <H4>远程视频</H4>
+
+        <video id="RVideo" autoplay controls/>
+    </div>
+</div>
+
+
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="index.js" type="text/javascript"></script>
+</body>
+</html>
