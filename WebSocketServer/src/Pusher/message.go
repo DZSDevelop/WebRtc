@@ -38,7 +38,7 @@ type Message struct {
 
 // last messages
 type LastMessageStore struct {
-	mutex    *sync.RWMutex
+	mutex    *sync.RWMutex //读写锁
 	number   int
 	messages *list.List
 }
