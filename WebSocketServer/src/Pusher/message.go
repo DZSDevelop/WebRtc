@@ -12,9 +12,8 @@ type MediaType int
 const (
 	Single MessageType = iota
 	Group
-	SysNotify
-	OnlineNotify
-	OfflineNotify
+	OnLineNotify
+	OffLineNotify
 )
 
 const (

@@ -150,7 +150,7 @@ func doConnected(conn *websocket.Conn) (string, error) {
 
 	timestamp := Timestamp()
 	var msg = &Message{
-		MessageType: OnlineNotify,
+		MessageType: OnLineNotify,
 		MediaType:   Text,
 		From:        userId,
 		CreateAt:    timestamp,
@@ -181,7 +181,7 @@ func doDisConnected(userId string, conn *websocket.Conn) error {
 
 	timestamp := Timestamp()
 	var msg = &Message{
-		MessageType: OfflineNotify,
+		MessageType: OffLineNotify,
 		MediaType:   Text,
 		From:        userId,
 		CreateAt:    timestamp,

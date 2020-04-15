@@ -33,6 +33,9 @@ function handleMediaStreamError(error) {
     trace(`navigator.getUserMedia error: ${error.toString()}.`);
 }
 
+
+
+
 //获取远程媒体流文件
 function gotRemoteMediaStream(event) {
     const mediaStream = event.stream;
