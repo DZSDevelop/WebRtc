@@ -33,9 +33,6 @@ function handleMediaStreamError(error) {
     trace(`navigator.getUserMedia error: ${error.toString()}.`);
 }
 
-
-
-
 //获取远程媒体流文件
 function gotRemoteMediaStream(event) {
     const mediaStream = event.stream;
@@ -44,36 +41,25 @@ function gotRemoteMediaStream(event) {
     trace('Remote peer connection received remote stream.');
 }
 
+function call() {
+    // 服务器配置
+    const servers = null;
+    localPeerConnection = new RTCPeerConnection(servers);
+    trace('Created local peer connection object localPeerConnection.');
+    localPeerConnection.addEventListener('icecandidate', handleConnection);
+    localPeerConnection.addEventListener('iceconnectionstatechange', handleConnectionChange);
 
+    remotePeerConnection = new RTCPeerConnection(servers);
+    trace('Created remote peer connection object remotePeerConnection.');
+    remotePeerConnection.addEventListener('icecandidate', handleConnection);
+    remotePeerConnection.addEventListener('iceconnectionstatechange', handleConnectionChange);
+    remotePeerConnection.addEventListener('track', gotRemoteMediaStream);
+    localPeerConnection.addTrack(localStream);
+    trace('Added local stream to localPeerConnection.');
 
-// 服务器配置
-const servers = null;
-
-localPeerConnection = new RTCPeerConnection(servers);
-trace('Created local peer connection object localPeerConnection.');
-
-localPeerConnection.addEventListener('icecandidate', handleConnection);
-localPeerConnection.addEventListener('iceconnectionstatechange', handleConnectionChange);
-
-
-
-
-
-remotePeerConnection = new RTCPeerConnection(servers);
-trace('Created remote peer connection object remotePeerConnection.');
-
-remotePeerConnection.addEventListener('icecandidate', handleConnection);
-remotePeerConnection.addEventListener('iceconnectionstatechange', handleConnectionChange);
-
-
-
-
-remotePeerConnection.addEventListener('addstream', gotRemoteMediaStream);
-localPeerConnection.addStream(localStream);
-trace('Added local stream to localPeerConnection.');
-
-trace('localPeerConnection createOffer start.');
-localPeerConnection.createOffer(offerOptions).then(createdOffer).catch(setSessionDescriptionError);
+    trace('localPeerConnection createOffer start.');
+    localPeerConnection.createOffer(offerOptions).then(createdOffer).catch(setSessionDescriptionError);
+}
 
 
 function handleConnection(event) {
@@ -83,27 +69,39 @@ function handleConnection(event) {
     if (iceCandidate) {
         const newIceCandidate = new RTCIceCandidate(iceCandidate);
         const otherPeer = getOtherPeer(peerConnection);
-
         otherPeer.addIceCandidate(newIceCandidate)
             .then(() => {
                 handleConnectionSuccess(peerConnection);
             }).catch((error) => {
             handleConnectionFailure(peerConnection, error);
         });
-
-        trace(`${getPeerName(peerConnection)} ICE candidate:\n` +
-            `${event.candidate.candidate}.`);
+        trace(`${getPeerName(peerConnection)} ICE candidate:\n` + `${event.candidate.candidate}.`);
     }
 }
+//处理连接成功回调
+function handleConnectionSuccess() {
 
+}
+//处理连接失败回调
+function handleConnectionFailure() {
+
+}
+//处理ICE发生改变的时候
 function handleConnectionChange(event) {
     const peerConnection = event.target;
     console.log('ICE state change event: ', event);
     trace(`${getPeerName(peerConnection)} ICE state: ` + `${peerConnection.iceConnectionState}.`);
 }
 
+//获取其它PeerConnection
+function getOtherPeer(peerConnection) {
+    return (peerConnection === localPeerConnection) ? remotePeerConnection : localPeerConnection;
+}
 
-
+// 获取PeerConnection的名称.
+function getPeerName(peerConnection) {
+    return (peerConnection === localPeerConnection) ? 'localPeerConnection' : 'remotePeerConnection';
+}
 
 //打印日志
 function trace(text) {
