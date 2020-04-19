@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WEB RTC TEST</title>
+    <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<!--显示控制按钮-->
+<H1>WEB RTC Test</H1>
+
+<div class="divTop">
+    <label for="userID">
+        <input id="userID" placeholder="请输入用户ID"/>
+    </label>
+    <button id="connect" onclick="connectServer()">连接Server</button>
+</div>
+
+
+<div class="divVideo">
+    本地视频
+    <video id="lVideo" autoplay controls></video>
+</div>
+<div class="divVideo">
+    <label for="callID1">
+        <input id="callID1" placeholder="请输入呼叫的用户ID"/>
+    </label>
+    <button id="call1" onclick="callUser1()">Call</button>
+    <button id="hu1" onclick="hangUp1()">hang Up</button>
+    <video id="RVideo1" autoplay controls></video>
+</div>
+<div class="divVideo">
+    <label for="callID2">
+        <input id="callID2" placeholder="请输入呼叫的用户ID"/>
+    </label>
+    <button id="call2" onclick="callUser2()">Call</button>
+    <button id="hu2" onclick="hangUp2()">hang Up</button>
+    <video id="RVideo2" autoplay controls></video>
+</div>
+
+
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="js/index.js" type="text/javascript"></script>
+</body>
+</html>

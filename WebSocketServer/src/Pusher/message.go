@@ -20,6 +20,8 @@ const (
 	Text MediaType = iota
 	Image
 	File
+	SDP
+	ICE
 )
 
 // websocket message
