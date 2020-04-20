@@ -119,62 +119,49 @@ function handlerMessage(m) {
 
 }
 
+//发送消息
+function sendMessage(toUser, json, type) {
+    sock.send(JSON.stringify({
+        messageType: 0,
+        mediaType: type,
+        from: userId,
+        to: toUser,
+        content: json,
+        createAt: new Date().getTime()
+    }))
+}
 
 //发送SDP信息
 function sendSDP(toUser, SDP) {
-    trace("发送SDP信息"+SDP)
-    sock.send(JSON.stringify({
-        messageType: 0,
-        mediaType: 3,
-        from: userId,
-        to: toUser,
-        offer: SDP,
-        createAt: new Date().getTime()
-    }))
+    let info = JSON.stringify(SDP).toString()
+    trace("发送SDP信息" + info)
+    sendMessage(toUser, info, 3)
 }
 
 //回复SDP信息
 function answerSDP(toUser, SDP) {
-    trace("回复SDP信息"+SDP)
-    sock.send(JSON.stringify({
-        messageType: 0,
-        mediaType: 4,
-        from: userId,
-        to: toUser,
-        offer: SDP,
-        createAt: new Date().getTime()
-    }))
+    let info = JSON.stringify(SDP).toString()
+    trace("回复SDP信息" + info)
+    sendMessage(toUser, info, 4)
 }
 
 //发送ICE信息
 function sendICE(toUser, ice) {
-    trace("发送ICE数据"+ice)
-    sock.send(JSON.stringify({
-        messageType: 0,
-        mediaType: 5,
-        from: userId,
-        to: toUser,
-        ice: ice,
-        createAt: new Date().getTime()
-    }))
+    let info = JSON.stringify(ice).toString()
+    trace("发送ICE数据" + info)
+    sendMessage(toUser, info, 5)
 }
 
 //回复ICE信息
 function answerICE(toUser, ice) {
-    trace("回复ICE数据"+ice)
-    sock.send(JSON.stringify({
-        messageType: 0,
-        mediaType: 6,
-        from: userId,
-        to: toUser,
-        ice: ice,
-        createAt: new Date().getTime()
-    }))
+    let info = JSON.stringify(ice).toString()
+    trace("回复ICE数据" + info)
+    sendMessage(toUser, info, 6)
 }
 
 //处理接收SDP信息
 function handlerSDP(msg) {
-    trace("接收SDP数据"+msg)
+    trace("接收SDP数据" + msg.content)
     remoteUser = msg.from;
     remoteRC = new RTCPeerConnection(iceConfig)
     remoteRC.onicecandidate = function (evt) {
@@ -189,7 +176,7 @@ function handlerSDP(msg) {
         rv1.srcObject = evt.streams[0]
     };
 
-    remoteRC.setRemoteDescription(new RTCSessionDescription(msg.offer)).then(() => {
+    remoteRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content))).then(() => {
         //加载本地流
         navigator.mediaDevices.getUserMedia(mediaStreamConstraints).then(function (mediaStream) {
             localStream = mediaStream
@@ -208,19 +195,19 @@ function handlerSDP(msg) {
 
 //处理回复SDP信息
 function handlerAnswerSDP(msg) {
-    trace("接收SDP"+msg.offer)
-    const remoteDescription = new RTCSessionDescription(msg.offer);
+    trace("接收SDP" + msg.content)
+    const remoteDescription = new RTCSessionDescription(JSON.parse(msg.content));
     localRC.setRemoteDescription(remoteDescription);
 }
 
 //处理接收ICE信息
 function handlerICE(msg) {
-    remoteRC.addIceCandidate(new RTCIceCandidate(msg.ice))
+    remoteRC.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content)))
 }
 
 //处理回复ICE信息
 function handlerAnswerICE(msg) {
-    localRC.addIceCandidate(new RTCIceCandidate(msg.ice))
+    localRC.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content)))
 }
 
 
