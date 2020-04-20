@@ -21,8 +21,20 @@ const (
 	Image
 	File
 	SDP
+	ASDP
 	ICE
+	AICE
 )
+
+type Offer struct {
+	Type string `json:"type"`
+	Sdp  string `json:"sdp"`
+}
+type Ice struct {
+	Candidate     string `json:"candidate"`
+	SdpMid        string `json:"sdpMid"`
+	SdpMLineIndex int64  `json:"sdpMLineIndex"`
+}
 
 // websocket message
 type Message struct {
@@ -33,6 +45,8 @@ type Message struct {
 	Content     string      `json:"content,omitempty"`
 	FileId      string      `json:"fileId,omitempty"`
 	Url         string      `json:"url,omitempty"`
+	Offer       Offer       `json:"offer,omitempty"`
+	Ice         Ice         `json:"ice,omitempty"`
 	CreateAt    int64       `json:"createAt,omitempty"`
 	UpdateAt    int64       `json:"updateAt,omitempty"`
 }
