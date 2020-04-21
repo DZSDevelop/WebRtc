@@ -8,7 +8,7 @@ const lv = document.getElementById('lVideo')
 const textUser1 = document.getElementById('callID1')
 const btnCall1 = document.getElementById('call1')
 const btnHU1 = document.getElementById('hu1')
-const rv1 = document.getElementById("rVideo1")
+const rv1 = document.getElementById("RVideo1")
 //呼叫用户2相关控件
 const textUser2 = document.getElementById('callID2')
 const btnCall2 = document.getElementById('call2')
@@ -108,11 +108,8 @@ function handlerMessage(m) {
                 break
             //接收ICE数据
             case 5:
-                handlerICE(msg)
-                break
-            //接收ICE数据
             case 6:
-                handlerAnswerICE(msg)
+                handlerICE(msg)
                 break
         }
     }
@@ -133,28 +130,28 @@ function sendMessage(toUser, json, type) {
 
 //发送SDP信息
 function sendSDP(toUser, SDP) {
-    let info = JSON.stringify(SDP).toString()
+    let info = JSON.stringify(SDP)
     trace("发送SDP信息" + info)
     sendMessage(toUser, info, 3)
 }
 
 //回复SDP信息
 function answerSDP(toUser, SDP) {
-    let info = JSON.stringify(SDP).toString()
+    let info = JSON.stringify(SDP)
     trace("回复SDP信息" + info)
     sendMessage(toUser, info, 4)
 }
 
 //发送ICE信息
 function sendICE(toUser, ice) {
-    let info = JSON.stringify(ice).toString()
+    let info = JSON.stringify(ice)
     trace("发送ICE数据" + info)
     sendMessage(toUser, info, 5)
 }
 
 //回复ICE信息
 function answerICE(toUser, ice) {
-    let info = JSON.stringify(ice).toString()
+    let info = JSON.stringify(ice)
     trace("回复ICE数据" + info)
     sendMessage(toUser, info, 6)
 }
@@ -195,24 +192,23 @@ function handlerSDP(msg) {
 
 //处理回复SDP信息
 function handlerAnswerSDP(msg) {
-    trace("接收SDP" + msg.content)
-    const remoteDescription = new RTCSessionDescription(JSON.parse(msg.content));
-    localRC.setRemoteDescription(remoteDescription);
+    trace("处理回复SDP" + msg.content)
+    localRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content))).catch(e => {
+        trace("处理回复SDP异常" + e)
+    })
 }
 
 //处理接收ICE信息
 function handlerICE(msg) {
-    remoteRC.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content)))
+    trace("处理ICE消息" + msg.content);
+    (msg.mediaType === 5 ? remoteRC : localRC).addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content))).catch(e => {
+        trace("处理ICE消息异常" + e)
+    })
 }
 
-//处理回复ICE信息
-function handlerAnswerICE(msg) {
-    localRC.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content)))
-}
-
-
-//创建PeerConnection
+//创建本地Peer
 function createLocalPeerConnection() {
+    trace("创建RTCPeerConnection")
     localRC = new RTCPeerConnection(iceConfig)
     localRC.onnegotiationneeded = function (evt) {
         localRC.createOffer().then(function (offer) {
