@@ -11,7 +11,7 @@ import (
 // websocket connection manager instance
 var CManager = &ConnManager{
 	Online:      new(int32),
-	connections: new(sync.Map),
+	Connections: new(sync.Map),
 }
 
 // websocket connection manager
@@ -19,13 +19,13 @@ type ConnManager struct {
 	// websocket connection number
 	Online *int32
 	// websocket connection
-	connections *sync.Map
+	Connections *sync.Map
 }
 
 // add websocket connection
 // online number + 1
 func (m *ConnManager) Connected(k, v interface{}) {
-	m.connections.Store(k, v)
+	m.Connections.Store(k, v)
 
 	atomic.AddInt32(m.Online, 1)
 }
@@ -33,19 +33,18 @@ func (m *ConnManager) Connected(k, v interface{}) {
 // remove websocket connection by key
 // online number - 1
 func (m *ConnManager) DisConnected(k interface{}) {
-	m.connections.Delete(k)
-
+	m.Connections.Delete(k)
 	atomic.AddInt32(m.Online, -1)
 }
 
 // get websocket connection by key
 func (m *ConnManager) Get(k interface{}) (v interface{}, ok bool) {
-	return m.connections.Load(k)
+	return m.Connections.Load(k)
 }
 
 // iter websocket connections
 func (m *ConnManager) Foreach(f func(k, v interface{})) {
-	m.connections.Range(func(k, v interface{}) bool {
+	m.Connections.Range(func(k, v interface{}) bool {
 		f(k, v)
 		return true
 	})

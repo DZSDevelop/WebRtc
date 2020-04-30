@@ -13,11 +13,9 @@ const rv1 = document.getElementById("RVideo1")
 const textUser2 = document.getElementById('callID2')
 const btnCall2 = document.getElementById('call2')
 const btnHU2 = document.getElementById('hu2')
-const rv2 = document.getElementById("rVideo2")
+const rv2 = document.getElementById("RVideo2")
 
 let localStream
-let r1Stream
-let r2Stream
 
 let Server = "ws://localhost:8080/websocket?userId="
 let sock = null
@@ -61,7 +59,7 @@ function callUser1() {
         localStream = mediaStream;
         createLocalPeerConnection()
         mediaStream.getTracks().forEach(track => {
-            localRC.addTrack(track, mediaStream)
+            localRC.addTrack(track)
         })
     });
 }
@@ -172,7 +170,6 @@ function handlerSDP(msg) {
     remoteRC.ontrack = function (evt) {
         rv1.srcObject = evt.streams[0]
     };
-
     remoteRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content))).then(() => {
         //加载本地流
         navigator.mediaDevices.getUserMedia(mediaStreamConstraints).then(function (mediaStream) {
