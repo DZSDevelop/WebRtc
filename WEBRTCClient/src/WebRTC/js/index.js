@@ -17,7 +17,7 @@ const rv2 = document.getElementById("RVideo2")
 
 let localStream
 
-let Server = "ws://localhost:8080/websocket?userId="
+let Server = "ws://localhost:9090/websocket?clientId="
 let sock = null
 let userId;//当前用户ID
 let remoteUser;//远程用户ID
