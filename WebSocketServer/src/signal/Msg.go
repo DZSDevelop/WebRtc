@@ -9,22 +9,17 @@ type MediaType int
 const (
 	SingleChat MessageType = iota
 	GroupChat
-)
-
-const (
-	Text MediaType = iota
-	Image
+	Broadcast
 )
 
 //定义消息体
 type Msg struct {
-	MessageType MessageType `json:"message_type"`
-	MediaType   MediaType   `json:"media_type"`
+	MessageType MessageType `json:"messageType"`
 	From        string      `json:"from"`
-	To          string      `json:"to"`
+	To          []string    `json:"to"`
 	Content     string      `json:"content,omitempty"`
-	CreateAt    int64       `json:"create_at,omitempty"`
-	UpdateAt    int64       `json:"update_at,omitempty"`
+	CreateAt    int64       `json:"createAt,omitempty"`
+	UpdateAt    int64       `json:"updateAt,omitempty"`
 }
 
 func (m *Msg) toString() string {

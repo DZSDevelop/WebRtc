@@ -38,10 +38,12 @@ func doReceived(clientId string, conn *websocket.Conn, msg *Msg) {
 	fmt.Printf("Received Msg. Client: %s \nMsg: %s", clientId, msg.toString())
 	switch msg.MessageType {
 	case SingleChat:
-		if err := CManager.SendMsg(msg.To, msg); err != nil {
+		if err := CManager.SendMsg(msg.To[0], msg); err != nil {
 			fmt.Println("Send msg error: ", err)
 		}
 	case GroupChat:
+		CManager.SendMultiMsg(msg.To, msg)
+	case Broadcast:
 		CManager.BroadcastMsgExceptClient(clientId, msg)
 	}
 }

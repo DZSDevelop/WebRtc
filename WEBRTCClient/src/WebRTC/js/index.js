@@ -16,7 +16,8 @@ let sock = null
 let userId;//当前用户ID
 let remoteUser;//远程用户ID
 //音频设置
-let mediaStreamConstraints = {video: true,}
+//let mediaStreamConstraints = {video: true,}
+let mediaStreamConstraints = {video: {},}
 //ICE 配置
 let iceConfig = {
     "iceServers": [
@@ -54,7 +55,7 @@ function callUser1() {
         localStream = mediaStream;
         createLocalPeerConnection()
         mediaStream.getTracks().forEach(track => {
-            localRC.addTrack(track)
+            localRC.addTrack(track, localStream)
         })
     });
 }
@@ -79,20 +80,20 @@ function handlerConnectClose() {
 //处理消息
 function handlerMessage(m) {
     const msg = JSON.parse(m.data)
-    if (msg.messageType === 0 && userId === msg.to) {
+    if (userId === msg.to) {
 
-        switch (msg.mediaType) {
+        switch (msg.content.MT) {
             //接收SDP数据
-            case 3:
+            case "SDP":
                 handlerSDP(msg)
                 break
             //接收回复SDP数据
-            case 4:
+            case "ASDP":
                 handlerAnswerSDP(msg)
                 break
             //接收ICE数据
-            case 5:
-            case 6:
+            case "ICE":
+            case "AICE":
                 handlerICE(msg)
                 break
         }
@@ -104,9 +105,8 @@ function handlerMessage(m) {
 function sendMessage(toUser, json) {
     sock.send(JSON.stringify({
         messageType: 0,
-        mediaType: 0,
         from: userId,
-        to: toUser,
+        to: [][0] = toUser,
         content: json,
         createAt: new Date().getTime()
     }))
@@ -114,30 +114,38 @@ function sendMessage(toUser, json) {
 
 //发送SDP信息
 function sendSDP(toUser, SDP) {
-    let info = JSON.stringify(SDP)
+    let info = JSON.stringify({
+        SDP: SDP
+    })
     trace("发送SDP信息" + info)
-    sendMessage(toUser, info, 3)
+    sendMessage(toUser, info)
 }
 
 //回复SDP信息
 function answerSDP(toUser, SDP) {
-    let info = JSON.stringify(SDP)
+    let info = JSON.stringify({
+        SDP: SDP
+    })
     trace("回复SDP信息" + info)
-    sendMessage(toUser, info, 4)
+    sendMessage(toUser, info)
 }
 
 //发送ICE信息
 function sendICE(toUser, ice) {
-    let info = JSON.stringify(ice)
+    let info = JSON.stringify({
+        ICE: ice
+    })
     trace("发送ICE数据" + info)
-    sendMessage(toUser, info, 5)
+    sendMessage(toUser, info)
 }
 
 //回复ICE信息
 function answerICE(toUser, ice) {
-    let info = JSON.stringify(ice)
+    let info = JSON.stringify({
+        ICE: ice
+    })
     trace("回复ICE数据" + info)
-    sendMessage(toUser, info, 6)
+    sendMessage(toUser, info)
 }
 
 //处理接收SDP信息
@@ -156,7 +164,7 @@ function handlerSDP(msg) {
     remoteRC.ontrack = function (evt) {
         rv1.srcObject = evt.streams[0]
     };
-    remoteRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content))).then(() => {
+    remoteRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content.SDP))).then(() => {
         //加载本地流
         navigator.mediaDevices.getUserMedia(mediaStreamConstraints).then(function (mediaStream) {
             localStream = mediaStream
@@ -175,8 +183,8 @@ function handlerSDP(msg) {
 
 //处理回复SDP信息
 function handlerAnswerSDP(msg) {
-    trace("处理回复SDP" + msg.content)
-    localRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content))).catch(e => {
+    trace("处理回复SDP" + msg.content.SDP)
+    localRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content.SDP))).catch(e => {
         trace("处理回复SDP异常" + e)
     })
 }
@@ -184,7 +192,7 @@ function handlerAnswerSDP(msg) {
 //处理接收ICE信息
 function handlerICE(msg) {
     trace("处理ICE消息" + msg.content);
-    (msg.mediaType === 5 ? remoteRC : localRC).addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content))).catch(e => {
+    (msg.content.MT === "ICE" ? remoteRC : localRC).addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content.ICE))).catch(e => {
         trace("处理ICE消息异常" + e)
     })
 }
