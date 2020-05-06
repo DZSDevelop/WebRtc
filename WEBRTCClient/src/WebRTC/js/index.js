@@ -2,18 +2,12 @@
 const btnCS = document.getElementById('connect')
 const textUser = document.getElementById('userID')
 //显示本地视频相关控件
-const btnShowLocal = document.getElementById('showLocal')
 const lv = document.getElementById('lVideo')
-//呼叫用户1相关控件
+//呼叫用户相关控件
 const textUser1 = document.getElementById('callID1')
 const btnCall1 = document.getElementById('call1')
 const btnHU1 = document.getElementById('hu1')
 const rv1 = document.getElementById("RVideo1")
-//呼叫用户2相关控件
-const textUser2 = document.getElementById('callID2')
-const btnCall2 = document.getElementById('call2')
-const btnHU2 = document.getElementById('hu2')
-const rv2 = document.getElementById("RVideo2")
 
 let localStream
 
@@ -23,6 +17,7 @@ let userId;//当前用户ID
 let remoteUser;//远程用户ID
 //音频设置
 let mediaStreamConstraints = {video: true,}
+//ICE 配置
 let iceConfig = {
     "iceServers": [
         {url: 'stun:stun.ekiga.net'},
@@ -69,16 +64,6 @@ function hangUp1() {
 
 }
 
-//拨打第二位用户
-function callUser2() {
-
-}
-
-//挂断
-function hangUp2() {
-
-}
-
 //信令服务器连接成功
 function handlerConnectSuccess() {
     textUser.disabled = true
@@ -95,6 +80,7 @@ function handlerConnectClose() {
 function handlerMessage(m) {
     const msg = JSON.parse(m.data)
     if (msg.messageType === 0 && userId === msg.to) {
+
         switch (msg.mediaType) {
             //接收SDP数据
             case 3:
@@ -115,10 +101,10 @@ function handlerMessage(m) {
 }
 
 //发送消息
-function sendMessage(toUser, json, type) {
+function sendMessage(toUser, json) {
     sock.send(JSON.stringify({
         messageType: 0,
-        mediaType: type,
+        mediaType: 0,
         from: userId,
         to: toUser,
         content: json,

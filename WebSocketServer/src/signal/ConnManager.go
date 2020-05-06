@@ -25,7 +25,7 @@ func (c *ConnManager) Connected(k, v interface{}) {
 }
 func (c *ConnManager) DisConnected(k interface{}) {
 	c.Connections.Delete(k)
-	atomic.AddUint32(c.OnLineNum, -1)
+	atomic.AddUint32(c.OnLineNum, ^uint32(1-1))
 }
 func (c *ConnManager) GetConnected(k interface{}) (v interface{}, ok bool) {
 	return c.Connections.Load(k)
