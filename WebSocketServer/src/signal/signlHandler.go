@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"golang.org/x/net/websocket"
+	"io"
 )
 
 func Handler(conn *websocket.Conn) {
@@ -18,7 +19,15 @@ func Handler(conn *websocket.Conn) {
 		msg := new(Msg)
 		if err := websocket.JSON.Receive(conn, msg); err != nil {
 			fmt.Println("Can not receive . error:", err)
-			continue
+			if io.EOF == err {
+				if err := closeConn(clientId); err != nil {
+					CManager.DisConnected(clientId)
+					fmt.Println(err)
+				}
+				break
+			} else {
+				continue
+			}
 		}
 		go doReceived(clientId, conn, msg)
 	}
@@ -60,8 +69,8 @@ func getClientId(conn *websocket.Conn) (string, error) {
 	return clientId, nil
 }
 
-func closeConn(userId string) error {
-	v, ok := CManager.GetConnected(userId)
+func closeConn(clientId string) error {
+	v, ok := CManager.GetConnected(clientId)
 	if !ok {
 		return errors.New("connection not exist")
 	}
@@ -69,6 +78,6 @@ func closeConn(userId string) error {
 		fmt.Println("Close connect error", err)
 		return err
 	}
-	CManager.DisConnected(userId)
+	CManager.DisConnected(clientId)
 	return nil
 }
