@@ -35,8 +35,8 @@ function connectServer() {
         alert("请输入当前用户ID")
         return
     }
-    Server = Server + userId
-    sock = new WebSocket(Server)
+    let st = Server + userId
+    sock = new WebSocket(st)
     sock.onopen = handlerConnectSuccess
     sock.onclose = handlerConnectClose
     sock.onmessage = handlerMessage
@@ -80,71 +80,74 @@ function handlerConnectClose() {
 //处理消息
 function handlerMessage(m) {
     const msg = JSON.parse(m.data)
-    if (userId === msg.to) {
-
-        switch (msg.content.MT) {
-            //接收SDP数据
-            case "SDP":
-                handlerSDP(msg)
-                break
-            //接收回复SDP数据
-            case "ASDP":
-                handlerAnswerSDP(msg)
-                break
-            //接收ICE数据
-            case "ICE":
-            case "AICE":
-                handlerICE(msg)
-                break
+    msg.to.some(function (item) {
+        if (userId === item) {
+            switch (msg.content.MT) {
+                //接收SDP数据
+                case "SDP":
+                    handlerSDP(msg)
+                    break
+                //接收回复SDP数据
+                case "ASDP":
+                    handlerAnswerSDP(msg)
+                    break
+                //接收ICE数据
+                case "ICE":
+                case "AICE":
+                    handlerICE(msg)
+                    break
+            }
+            return true
         }
-    }
-
+    })
 }
 
 //发送消息
 function sendMessage(toUser, json) {
-    sock.send(JSON.stringify({
+    let msg = JSON.stringify({
         messageType: 0,
         from: userId,
-        to: [][0] = toUser,
+        to: [toUser],
         content: json,
         createAt: new Date().getTime()
-    }))
+    })
+    trace("发送消息信息" + msg)
+    sock.send(msg)
 }
 
 //发送SDP信息
 function sendSDP(toUser, SDP) {
     let info = JSON.stringify({
+        MT: "SDP",
         SDP: SDP
     })
-    trace("发送SDP信息" + info)
     sendMessage(toUser, info)
 }
 
 //回复SDP信息
 function answerSDP(toUser, SDP) {
     let info = JSON.stringify({
+        MT: "ASDP",
         SDP: SDP
     })
-    trace("回复SDP信息" + info)
     sendMessage(toUser, info)
 }
 
 //发送ICE信息
 function sendICE(toUser, ice) {
     let info = JSON.stringify({
+        MT: "ICE",
         ICE: ice
     })
-    trace("发送ICE数据" + info)
     sendMessage(toUser, info)
 }
 
 //回复ICE信息
 function answerICE(toUser, ice) {
     let info = JSON.stringify({
+        MT: "AICE",
         ICE: ice
     })
-    trace("回复ICE数据" + info)
     sendMessage(toUser, info)
 }
 

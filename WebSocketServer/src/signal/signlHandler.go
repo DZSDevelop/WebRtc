@@ -29,7 +29,7 @@ func Handler(conn *websocket.Conn) {
 				continue
 			}
 		}
-		go doReceived(clientId, conn, msg)
+		doReceived(clientId, conn, msg)
 	}
 }
 
@@ -44,7 +44,7 @@ func doConn(conn *websocket.Conn) (string, error) {
 
 func doReceived(clientId string, conn *websocket.Conn, msg *Msg) {
 	msg.UpdateAt = Timestamp()
-	fmt.Printf("Received Msg. Client: %s \nMsg: %s", clientId, msg.toString())
+	fmt.Printf("Received Msg. Client: %s \nMsg: %s \n", clientId, msg.toString())
 	switch msg.MessageType {
 	case SingleChat:
 		if err := CManager.SendMsg(msg.To[0], msg); err != nil {

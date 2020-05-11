@@ -36,7 +36,7 @@ func (c *ConnManager) Foreach(f func(k, v interface{})) {
 		return true
 	})
 }
-func (c *ConnManager) sendMsg(v interface{}, msg *Msg) error {
+func (c *ConnManager) sMsg(v interface{}, msg *Msg) error {
 	if conn, ok := v.(*websocket.Conn); ok {
 		if err := websocket.JSON.Send(conn, msg); err != nil {
 			return errors.New(fmt.Sprintf("Send msg error %s", err))
@@ -49,7 +49,7 @@ func (c *ConnManager) sendMsg(v interface{}, msg *Msg) error {
 func (c *ConnManager) SendMsg(k string, msg *Msg) error {
 	v, ok := c.GetConnected(k)
 	if ok {
-		return c.sendMsg(v, msg)
+		return c.sMsg(v, msg)
 	} else {
 		return errors.New("connection not exist")
 	}
@@ -62,8 +62,8 @@ func (c *ConnManager) SendMultiMsg(keys []string, msg *Msg) {
 	}
 }
 func (c *ConnManager) BroadcastMsg(msg *Msg) {
-	c.Foreach(func(k, v interface{}) {
-		if err := c.sendMsg(v, msg); err != nil {
+	c.Foreach(func(_, v interface{}) {
+		if err := c.sMsg(v, msg); err != nil {
 			fmt.Println("Send msg error:", err)
 		}
 	})
@@ -71,7 +71,7 @@ func (c *ConnManager) BroadcastMsg(msg *Msg) {
 func (c *ConnManager) BroadcastMsgExceptClient(client string, msg *Msg) {
 	c.Foreach(func(k, v interface{}) {
 		if strings.Compare(client, k.(string)) != 0 {
-			if err := c.sendMsg(v, msg); err != nil {
+			if err := c.sMsg(v, msg); err != nil {
 				fmt.Println("Send msg error:", err)
 			}
 		}

@@ -23,7 +23,7 @@ type Msg struct {
 }
 
 func (m *Msg) toString() string {
-	if js, err := json.Marshal(m); err != nil {
+	if js, err := json.Marshal(m); err == nil {
 		return string(js)
 	}
 	return ""
