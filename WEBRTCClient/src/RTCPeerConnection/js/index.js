@@ -62,7 +62,12 @@ function callUser1() {
 
 //挂断
 function hangUp1() {
-
+    localRC.close()
+    remoteRC.close()
+    localRC = null
+    remoteRC = null
+    btnCall1.disabled = false
+    btnHU1.disabled = true
 }
 
 //信令服务器连接成功
@@ -79,22 +84,24 @@ function handlerConnectClose() {
 
 //处理消息
 function handlerMessage(m) {
-    const msg = JSON.parse(m.data)
+    let msg = JSON.parse(m.data)
+    trace("接收信息" + msg)
+    let content = JSON.parse(msg.content)
     msg.to.some(function (item) {
         if (userId === item) {
-            switch (msg.content.MT) {
+            switch (content.MT) {
                 //接收SDP数据
                 case "SDP":
-                    handlerSDP(msg)
+                    handlerSDP(msg.from, content)
                     break
                 //接收回复SDP数据
                 case "ASDP":
-                    handlerAnswerSDP(msg)
+                    handlerAnswerSDP(content)
                     break
                 //接收ICE数据
                 case "ICE":
                 case "AICE":
-                    handlerICE(msg)
+                    handlerICE(content)
                     break
             }
             return true
@@ -152,9 +159,8 @@ function answerICE(toUser, ice) {
 }
 
 //处理接收SDP信息
-function handlerSDP(msg) {
-    trace("接收SDP数据" + msg.content)
-    remoteUser = msg.from;
+function handlerSDP(user, content) {
+    remoteUser = user;
     remoteRC = new RTCPeerConnection(iceConfig)
     remoteRC.onicecandidate = function (evt) {
         if (evt.candidate) {
@@ -167,7 +173,7 @@ function handlerSDP(msg) {
     remoteRC.ontrack = function (evt) {
         rv1.srcObject = evt.streams[0]
     };
-    remoteRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content.SDP))).then(() => {
+    remoteRC.setRemoteDescription(new RTCSessionDescription(content.SDP)).then(() => {
         //加载本地流
         navigator.mediaDevices.getUserMedia(mediaStreamConstraints).then(function (mediaStream) {
             localStream = mediaStream
@@ -185,17 +191,15 @@ function handlerSDP(msg) {
 }
 
 //处理回复SDP信息
-function handlerAnswerSDP(msg) {
-    trace("处理回复SDP" + msg.content.SDP)
-    localRC.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.content.SDP))).catch(e => {
+function handlerAnswerSDP(content) {
+    localRC.setRemoteDescription(new RTCSessionDescription(content.SDP)).catch(e => {
         trace("处理回复SDP异常" + e)
     })
 }
 
 //处理接收ICE信息
-function handlerICE(msg) {
-    trace("处理ICE消息" + msg.content);
-    (msg.content.MT === "ICE" ? remoteRC : localRC).addIceCandidate(new RTCIceCandidate(JSON.parse(msg.content.ICE))).catch(e => {
+function handlerICE(content) {
+    (content.MT === "ICE" ? remoteRC : localRC).addIceCandidate(new RTCIceCandidate(content.ICE)).catch(e => {
         trace("处理ICE消息异常" + e)
     })
 }
